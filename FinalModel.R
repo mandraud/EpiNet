@@ -50,17 +50,17 @@ RunModel<-function(P,data){
       source('functions.R')
           
     #initialise simulations
-        df<-data.frame(dfInit)
+        Moves<-data.frame(dfInit)
         Tournees<-data.frame(TourneesInit)
 
     
         # herdDesc$biosecurity<-sample(1:3,nrow(herdDesc),replace = TRUE)
     
     # Set the introduction date and location        
-        day=as.Date(sample(df$date,1))
+        day=as.Date(sample(Moves$date,1))
         dayEnd=day+Duration
         as.character(sample(herdDesc$lieu[herdDesc$site %in% HT[Type] & 
-                                            herdDesc$lieu %in% df$from[(df$date>day & df$date<dayEnd)]],1))->origine
+                                            herdDesc$lieu %in% Moves$from[(Moves$date>day & Moves$date<dayEnd)]],1))->origine
         herdDesc<-Initialize(herdDesc,origine,day)
     
     
@@ -81,7 +81,7 @@ RunModel<-function(P,data){
         detHerds <- select(herdDesc %>% filter(isDetected & detectionDate==day),"lieu")
         
         if(StopAll & nrow(detHerds)>0){
-          df       <- RemoveLinks(df,detHerds,day) 
+          Moves       <- RemoveLinks(Moves,detHerds,day) 
           Tournees <- RemoveLinks(Tournees,detHerds,day) 
         }
         if(StopRounds & nrow(detHerds)>0){
@@ -94,7 +94,7 @@ RunModel<-function(P,data){
       # implement surveillance protocols: 
         # onset of protection and surveillance zones around detected herds
         # Tracing of contact herds. 
-      herdDesc<-HerdSurveillance(herdDesc,day,df,Tournees)
+      herdDesc<-HerdSurveillance(herdDesc,day,Moves,Tournees)
       
       #Protection zone movement control
       ProtHerd=select(herdDesc %>% 
@@ -102,7 +102,7 @@ RunModel<-function(P,data){
                       "lieu")
       
         if (ControlProt & nrow(ProtHerd)>0){
-          df       <- RemoveLinks(df,ProtHerd,day)  
+          Moves       <- RemoveLinks(Moves,ProtHerd,day)  
           Tournees <- RemoveLinks(Tournees,ProtHerd,day)  
         }
       
@@ -111,7 +111,7 @@ RunModel<-function(P,data){
                         filter(surveillance== "Surveillance Zone" & SurvDate==day),
                       "lieu")
         if (ControlSurv & nrow(SurvHerd)>0){
-          df       <- RemoveLinks(df,SurvHerd,day)  
+          Moves       <- RemoveLinks(Moves,SurvHerd,day)  
           Tournees <- RemoveLinks(Tournees,SurvHerd,day)
         }
       
@@ -126,7 +126,7 @@ RunModel<-function(P,data){
                       "lieu"
                       )
         if (ControlTrace & nrow(TraceHerd)>0){
-          df       <- RemoveLinks(df,TraceHerd,day)  
+          Moves       <- RemoveLinks(Moves,TraceHerd,day)  
           Tournees <- RemoveLinks(Tournees,TraceHerd,day)
         }
  
@@ -134,7 +134,7 @@ RunModel<-function(P,data){
 # Transmission Processes ----------------------------------------------
 
       #keep  movements on day D 
-      daydf<-df[df$date==day,]
+      daydf<-Moves[Moves$date==day,]
       if (nrow(Tournees)>0){
         dayTour<-Tournees[Tournees$date==day,]
       }else{dayTour=NULL}
