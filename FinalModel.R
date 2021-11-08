@@ -27,7 +27,8 @@ RunModel<-function(P,data){
   beta1<-0.6           # Within-herd direct transmission rate
   betaLoc<-0.0001      # Local transmission rate
   probInfTransit<-0.05 # Probability of transmission though transit trucks
-  
+  StopAll<-TRUE
+  StopRounds<-FALSE
   cl<-rep(10,3)
   cl0 <- makeCluster(3)
   registerDoParallel(cl0)
